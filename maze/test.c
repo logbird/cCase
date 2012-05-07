@@ -8,28 +8,48 @@
 #include "stack.h"
 
 
-#define MAP_SIZE 10
+#define MAP_SIZE 30
 #define ROAD "  "
 #define BARRIER "口" 
-#define WAY "OO"
+#define WAY "＊"
 
 static STACK_NODE *stack;
 static int map[][MAP_SIZE] = {
-	{1,0,1,1,1,1,1,1,1,1},
-	{1,0,1,0,0,0,0,0,0,1},
-	{1,0,0,0,1,0,1,1,0,1},
-	{1,0,1,1,1,0,1,0,0,1},
-	{1,0,0,0,1,0,1,1,1,1},
-	{1,1,1,1,1,0,0,0,0,1},
-	{1,0,0,0,0,1,0,1,0,1},
-	{1,0,1,1,0,1,1,1,0,1},
-	{1,0,1,1,0,0,0,0,0,1},
-	{1,0,1,1,1,1,1,1,1,1},
+	{1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,0,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1},
+	{1,0,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0,0,1,0,1},
+	{1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1},
+	{1,1,1,0,0,0,0,1,1,0,1,1,0,0,0,0,0,1,0,1,1,1,0,1,1,1,0,0,0,1},
+	{1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1},
+	{1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,0,1,0,1,0,0,0,1,1,1,1,1,1,1},
+	{1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1},
+	{1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1},
+	{1,1,1,0,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1},
+	{1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1},
+	{1,0,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1},
+	{1,1,1,1,1,1,0,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,0,1,1,0,1,1,1,1},
+	{1,0,0,0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,0,1,0,1,1,1,1},
+	{1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,1},
+	{1,0,1,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,1,1,1,1,1,0,1,1,0,1,1,1},
+	{1,0,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1,1,1},
+	{1,0,0,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1},
+	{1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,1},
+	{1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1},
+	{1,1,0,0,0,1,1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,0,1,1,1,1,1,1,1,1},
+	{1,1,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,0,1,1,1,0,1,1,1,1,1,1,1,1},
+	{1,1,0,0,0,0,1,1,0,0,0,1,0,1,1,0,1,0,1,0,0,0,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,0,0,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,0,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}
 };
 
 void main()
 {
-	int isWalk = 0;
+	int delay = 0;
 
 	signal(SIGINT, sigint_callback);	
 	COORD_DATA *c, *nextWay, *lastWay;
@@ -48,48 +68,56 @@ void main()
 
 	while(TRUE)
 	{
+	    delay = 0;
 		printMap();
-		sleep(1);
-		isWalk = 0;
+		while(delay++ < 30000000);
 		c = top();
 		//Win
+        /*
 		if(c!= NULL)
 		{
 			printf("LENGTH:%d\n", c->y);
 		}
-		if(c == NULL || c->y == MAP_SIZE - 1)
+        */
+        if(c == NULL)
+        {
+            printf("You Loss!\nNo Way Out!\n");
+            break;
+        }
+		if(c->y == MAP_SIZE - 1)
 		{
+            printf("You Win!\nMaze Over!\n");
 			break;
 		}
 		//top
 		nextWay->x = c->x;
 		nextWay->y = c->y - 1;
-		if(isWalk = walk(nextWay, lastWay))
+		if(walk(nextWay, lastWay))
 		{
 			continue;
 		}
 		//bottom
 		nextWay->x = c->x;
 		nextWay->y = c->y + 1;
-		if(isWalk = walk(nextWay, lastWay))
+		if(walk(nextWay, lastWay))
 		{
 			continue;
 		}
 		//left
 		nextWay->x = c->x - 1;
 		nextWay->y = c->y;
-		if(isWalk = walk(nextWay, lastWay))
+		if(walk(nextWay, lastWay))
 		{
 			continue;
 		}
 		//right
 		nextWay->x = c->x + 1;
 		nextWay->y = c->y;
-		if(isWalk = walk(nextWay, lastWay))
+		if(walk(nextWay, lastWay))
 		{
 			continue;
 		}
-		map[c->y][c->x] = 0;
+		map[c->y][c->x] = 3;
 		lastWay->x = c->x;
 		lastWay->y = c->y;
 		pop();
@@ -97,23 +125,28 @@ void main()
 	free(lastWay);
 	free(nextWay);
 	destructStack();
-
-	exit(EXIT_SUCCESS);
-	while(TRUE)
-	{
-		printMap();
-		sleep(1);
-	}
 }
 
 
 void printMap()
 {
-//	system("clear");
+	system("clear");
 	int i = 0;
 	int j = 0;
 	for(i = 0; i < MAP_SIZE; i++)
 	{
+        /*
+        if(i == 0)
+        {
+            printf(" 0");
+            for(j = 0; j < MAP_SIZE; j++)
+            {
+                printf("%2d", j);
+            }
+            printf("\n");
+        }
+        printf("%2d", i);
+        */
 		for(j = 0; j < MAP_SIZE; j++)
 		{
 			if(map[i][j] == 1)
@@ -206,22 +239,33 @@ int checkStackExists( COORD_DATA *coord)
 		return FALSE;
 	}
 	tmp = stack;
-	while(tmp != NULL)
+	while(tmp != NULL && tmp->index >= 0)
 	{
-		c = top(tmp);
+		c = tmp->coord;
+        //printf("[%d|%d]", c->x, c->y);
 		if(c->x == coord->x && c->y == coord->y)
 		{
 			return TRUE;
 		}
 		tmp = tmp->next;
 	}
+    //printf("\n");
 	return FALSE;
 }
 
 int walk(COORD_DATA *c, COORD_DATA *l)
 {
 	COORD_DATA *now;
-	printf("%d|%d|%d|%d|%d|%d\n", c->x, c->y, checkStackExists(c), map[c->y][c->x], l->x, l->y);
+    /*
+    if(isEmpty())
+    {
+        now = top();
+	    printf("%d|%d|%d|%d|%d|%d|now:|%d|%d\n", c->x, c->y, checkStackExists(c), map[c->y][c->x], l->x, l->y, now->x, now->y);
+    }else
+    {
+        printf("%d|%d|%d|%d|%d|%d\n", c->x, c->y, checkStackExists(c), map[c->y][c->x], l->x, l->y);
+    }
+    */
 	if(
 		(l->x != c->x || l->y != c->y)
 		&& c->x >= 0 
@@ -243,7 +287,7 @@ int walk(COORD_DATA *c, COORD_DATA *l)
 		push(c);
 		return TRUE;
 	}
-	printf("R:1\n");
+	//printf("R:1\n");
 	return FALSE;
 }
 
