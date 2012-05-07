@@ -50,20 +50,22 @@ static int map[][MAP_SIZE] = {
 void main()
 {
 	int delay = 0;
-
-	signal(SIGINT, sigint_callback);	
+    //异常退出信号
+	signal(SIGINT, sigint_callback);
+    //设置 当前 坐标 前面路的 坐标 和 上一次走过路的坐标
 	COORD_DATA *c, *nextWay, *lastWay;
 	nextWay = malloc(sizeof(COORD_DATA));
 	assert(nextWay != NULL);
+    //起点
 	nextWay->x = 1;
 	nextWay->y = 0;
 	lastWay = malloc(sizeof(COORD_DATA));
 	assert(lastWay != NULL);
 	lastWay->x = -1;
 	lastWay->y = -1;
-
+    //创建堆栈
 	createStack();
-
+    //走进起点
 	walk(nextWay, lastWay);
 
 	while(TRUE)
@@ -73,12 +75,6 @@ void main()
 		while(delay++ < 30000000);
 		c = top();
 		//Win
-        /*
-		if(c!= NULL)
-		{
-			printf("LENGTH:%d\n", c->y);
-		}
-        */
         if(c == NULL)
         {
             printf("You Loss!\nNo Way Out!\n");
@@ -89,38 +85,22 @@ void main()
             printf("You Win!\nMaze Over!\n");
 			break;
 		}
-		//top
-		nextWay->x = c->x;
-		nextWay->y = c->y - 1;
-		if(walk(nextWay, lastWay))
-		{
-			continue;
-		}
-		//bottom
-		nextWay->x = c->x;
-		nextWay->y = c->y + 1;
-		if(walk(nextWay, lastWay))
-		{
-			continue;
-		}
-		//left
-		nextWay->x = c->x - 1;
-		nextWay->y = c->y;
-		if(walk(nextWay, lastWay))
-		{
-			continue;
-		}
-		//right
-		nextWay->x = c->x + 1;
-		nextWay->y = c->y;
-		if(walk(nextWay, lastWay))
-		{
-			continue;
-		}
-		map[c->y][c->x] = 3;
-		lastWay->x = c->x;
-		lastWay->y = c->y;
-		pop();
+        //尝试行走
+        if(
+            !checkNearByPos(nextWay, c, lastWay, up)
+            && !checkNearByPos(nextWay, c, lastWay, down)
+            && !checkNearByPos(nextWay, c, lastWay, left)
+            && !checkNearByPos(nextWay, c, lastWay, right)
+        )
+        {
+            //标记当前位置 不可通行
+            map[c->y][c->x] = 3;
+            //记录刚刚做过的坐标
+            lastWay->x = c->x;
+            lastWay->y = c->y;
+            //出栈（后退）
+            pop();
+        }
 	}
 	free(lastWay);
 	free(nextWay);
@@ -242,14 +222,12 @@ int checkStackExists( COORD_DATA *coord)
 	while(tmp != NULL && tmp->index >= 0)
 	{
 		c = tmp->coord;
-        //printf("[%d|%d]", c->x, c->y);
 		if(c->x == coord->x && c->y == coord->y)
 		{
 			return TRUE;
 		}
 		tmp = tmp->next;
 	}
-    //printf("\n");
 	return FALSE;
 }
 
@@ -287,10 +265,34 @@ int walk(COORD_DATA *c, COORD_DATA *l)
 		push(c);
 		return TRUE;
 	}
-	//printf("R:1\n");
 	return FALSE;
 }
 
-
+int checkNearByPos(COORD_DATA *nextWay, COORD_DATA *c, COORD_DATA *lastWay, enum DIRECTION dir)
+{
+    switch(dir)
+    {
+        case up:
+            nextWay->x = c->x;
+		    nextWay->y = c->y - 1;
+        break;
+        case down:
+            nextWay->x = c->x;
+		    nextWay->y = c->y + 1;
+        break;
+        case left:
+            nextWay->x = c->x - 1;
+		    nextWay->y = c->y;
+        break;
+        case right:
+            nextWay->x = c->x + 1;
+		    nextWay->y = c->y;
+        break;
+        default:
+            return FALSE;
+        break;
+    }
+	return walk(nextWay, lastWay);
+}
 
 
