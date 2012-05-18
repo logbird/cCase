@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv)
 {
-    printf(" Test");    
+    int num[6] = {1,43,23,62,123};
+    return 1;
 }
+

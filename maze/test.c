@@ -47,7 +47,7 @@ static int map[][MAP_SIZE] = {
 	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}
 };
 
-void main()
+int main(int argc, char** argv)
 {
 	int delay = 0;
     //异常退出信号
@@ -105,6 +105,7 @@ void main()
 	free(lastWay);
 	free(nextWay);
 	destructStack();
+    return EXIT_SUCCESS;
 }
 
 
