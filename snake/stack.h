@@ -28,6 +28,8 @@ typedef struct snakeHead{
 	SNAKE_NODE *next;
     SNAKE_NODE *end;
 }SNAKE_HEAD;
+//食物链
+COORD_DATA *food[FOOD_SIZE];
 
 
 void printMap();
@@ -50,7 +52,9 @@ enum DIRECTION findRoad(SNAKE_HEAD *s);
 //显示蛇
 void displaySnake(SNAKE_HEAD *s);
 //判断前方是否可以行走
-int isCross(int x, int y);
+int isCross(int x, int y, SNAKE_HEAD *s);
+//放置食物
+void setFood();
 
 
 
