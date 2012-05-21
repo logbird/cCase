@@ -242,7 +242,7 @@ enum DIRECTION findRoad(SNAKE_HEAD *s)
     COORD_DATA *coord = s->coord;
     int i, index = 0;
     unsigned int distance = 0;
-    //有食物存在
+    //找到最近的食物 然后前进
     for(i = 0; i < FOOD_SIZE; i++)
     {
         if(food[i] != NULL && (distance == 0 || distance > (abs(food[i]->y-coord->y) + abs(food[i]->x-coord->x))))
@@ -309,9 +309,18 @@ enum DIRECTION findRoad(SNAKE_HEAD *s)
 	}
     return none;
 }
-
+//枚举行进路径 改成枚举
+enum DIRECTION enumRoad(COORD_DATA *coord, int flg)
+{
+    int index = 0;
+    if((flg == 0 || flg == 1) && isCross(coord->y, coord->x))
+    {
+        ;
+    }
+    return 1;
+}
 //判断前方是否可以行走
-int isCross(int y, int x, SNAKE_HEAD *s)
+int isCross(int y, int x)
 {
     if(x < 1 || y < 1 || x >= MAP_SIZE || y >= MAP_SIZE || (map[y][x] != 0 && map[y][x] != 3))
     {

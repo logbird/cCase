@@ -49,8 +49,10 @@ void snakeDie(SNAKE_HEAD *s);
 
 //选择方向
 enum DIRECTION findRoad(SNAKE_HEAD *s);
+//枚举行进路径
+enum DIRECTION enumRoad(COORD_DATA *coord, int flg);
 //判断前方是否可以行走
-int isCross(int x, int y, SNAKE_HEAD *s);
+int isCross(int x, int y);
 //放置食物
 void setFood();
 
