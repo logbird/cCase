@@ -167,6 +167,7 @@ void destructStack()
 	{
 		pop();
 	}
+    free(stack);
 }
 
 void push( COORD_DATA *c)
