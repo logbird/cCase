@@ -1,7 +1,7 @@
 #define SNAKE_MAX 50
 
 
-typedef unsigned int COORD_TYPE ;
+typedef int COORD_TYPE ;
 
 //坐标
 typedef struct coord{
@@ -11,7 +11,7 @@ typedef struct coord{
 
 //设置方向
 enum DIRECTION{
-    up,down,left,right
+    up,down,left,right,none
 };
 
 //蛇
@@ -37,7 +37,7 @@ void sigint_callback(int sig);
 
 
 //创建蛇
-SNAKE_HEAD *createSnake();
+SNAKE_HEAD *createSnake(int x, int y);
 //蛇长大
 void snakeGrowUp(SNAKE_HEAD *s, size_t length); 
 //蛇行走
@@ -49,8 +49,6 @@ void snakeDie(SNAKE_HEAD *s);
 
 //选择方向
 enum DIRECTION findRoad(SNAKE_HEAD *s);
-//显示蛇
-void displaySnake(SNAKE_HEAD *s);
 //判断前方是否可以行走
 int isCross(int x, int y, SNAKE_HEAD *s);
 //放置食物

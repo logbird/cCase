@@ -8,7 +8,7 @@
 
 
 #define MAP_SIZE 30
-#define FOOD_SIZE 2
+#define FOOD_SIZE 5
 #define ROAD "  "
 #define BARRIER "口" 
 #define SNAKE "＊"
@@ -24,30 +24,50 @@ static int map[][MAP_SIZE] = {
     #include "map.h"
 };
 
-size_t snakeTotal = 0;
-size_t foodTotal = 0;
+int snakeTotal = 0;
 
 int main(int argc, char** argv)
 {
-	int delay = 0;
+	int delay = 0, sindex = 0;
     //异常退出信号
 	signal(SIGINT, sigint_callback);
 	srand((unsigned int)time(NULL));
 
     enum DIRECTION dir;
-    SNAKE_HEAD *s = createSnake();
-    snakeGrowUp(s, 5);
+    SNAKE_HEAD *snake[3];
+    snake[0] = createSnake(1, 1);
+    snake[1] = createSnake(1, 28);
+    snake[2] = createSnake(28, 1);
+
+    snakeGrowUp(snake[0], 5);
+    snakeGrowUp(snake[1], 5);
+    snakeGrowUp(snake[2], 5);
     while(1)
     {
-		delay = 0;
+        delay = 0;
 		while(delay++ < 30000000);
 		setFood();
-        dir = findRoad(s);
-        walkSnake(s, dir);
-		displaySnake(s);
+        for(sindex = 0; sindex<3; sindex++)
+        {
+            if(snake[sindex] == NULL)continue;
+            if(getSnakeTotal() <= 1)
+            {
+                printf("%d胜利\n", snake[sindex]->id);
+                free(snake[sindex]);
+                exit(EXIT_SUCCESS);
+            }
+            dir = findRoad(snake[sindex]);
+            if(dir == none)
+            {
+                snakeDie(snake[sindex]);
+                snake[sindex] = NULL;
+                continue;
+            }
+            
+            walkSnake(snake[sindex], dir);
+        }
         printMap();
     }
-    snakeDie(s);
     return EXIT_SUCCESS;
 }
 
@@ -78,7 +98,7 @@ void printMap()
                 break;
 			}
             //初始化地图
-            map[i][j] = mapInit[i][j];
+            //map[i][j] = mapInit[i][j];
 		}
 		printf("\n");
 	}
@@ -91,13 +111,13 @@ void sigint_callback(int sig)
 }
 
 //创建蛇
-SNAKE_HEAD * createSnake()
+SNAKE_HEAD * createSnake(int x, int y)
 {
     SNAKE_HEAD *s;
     COORD_DATA *coord = calloc(1, sizeof(SNAKE_HEAD));
     //默认出生地 为 (1,1)
-    coord->x = 1;
-    coord->y = 1;
+    coord->x = x;
+    coord->y = y;
     s = calloc(1, sizeof(SNAKE_HEAD));
     s->id = getSnakeTotal()+1;
     s->dir = right;
@@ -141,7 +161,7 @@ int walkSnake(SNAKE_HEAD *s, enum DIRECTION dir)
     COORD_DATA *tmp = calloc(1, sizeof(COORD_DATA));
     coord->x = s->coord->x;
     coord->y = s->coord->y;
-
+    int i = 0;
     switch(dir)
     {
         case up:
@@ -161,8 +181,27 @@ int walkSnake(SNAKE_HEAD *s, enum DIRECTION dir)
         break;
     } 
     s->dir = dir;
+    
+    for(i = 0; i < FOOD_SIZE; i++)
+    {
+        if(food[i] != NULL && food[i]->x == s->coord->x && food[i]->y == s->coord->y)
+        {
+            //吃到食物
+            snakeGrowUp(s, 1);
+            free(food[i]); 
+            food[i] = NULL;
+        }
+    }
     while(sn != NULL)
     {
+        if(map[sn->coord->y][sn->coord->x] != 1)
+        {
+            map[sn->coord->y][sn->coord->x] = 0;
+        }
+        if(!map[coord->y][coord->x])
+        {
+            map[coord->y][coord->x] = 2;
+        }
 		tmp->x = sn->coord->x;
 		tmp->y = sn->coord->y;
 	    sn->coord->x = coord->x;
@@ -184,8 +223,10 @@ size_t getSnakeTotal()
 void snakeDie(SNAKE_HEAD *s)
 {
     SNAKE_NODE *tmp,*sn = s->next;
+    map[s->coord->y][s->coord->x] = 0;
     while(sn != NULL)
     {
+        map[sn->coord->y][sn->coord->x] = 0;
         free(sn->coord);
         tmp = sn->next;
         free(sn);
@@ -199,6 +240,33 @@ void snakeDie(SNAKE_HEAD *s)
 enum DIRECTION findRoad(SNAKE_HEAD *s)
 {
     COORD_DATA *coord = s->coord;
+    int i, index = 0;
+    unsigned int distance = 0;
+    //有食物存在
+    for(i = 0; i < FOOD_SIZE; i++)
+    {
+        if(food[i] != NULL && (distance == 0 || distance > (abs(food[i]->y-coord->y) + abs(food[i]->x-coord->x))))
+        {
+            distance = (abs(food[i]->y-coord->y) + abs(food[i]->x-coord->x)); 
+            index = i;
+        }
+    }
+    if(food[index] != NULL)
+    {
+        //up
+        if((food[index]->y < coord->y) && isCross(coord->y-1, coord->x, s))
+            return up;
+        //down
+        if((food[index]->y > coord->y) && isCross(coord->y+1, coord->x, s))
+            return down;
+        //left
+        if((food[index]->x < coord->x) && isCross(coord->y, coord->x-1, s))
+            return left;
+        //right
+        if((food[index]->x > coord->x) && isCross(coord->y, coord->x+1, s))
+            return right;
+    }
+
     switch(s->dir)
     {
         case up:
@@ -239,42 +307,12 @@ enum DIRECTION findRoad(SNAKE_HEAD *s)
 	{
 		return right;
 	}
-	printf("无路可走\n");
-	exit(EXIT_FAILURE);
+    return none;
 }
-//显示蛇
-void displaySnake(SNAKE_HEAD *s)
-{
-	int i = 0;
-	SNAKE_NODE *sn = s->next;
-	//设置蛇头
-	map[s->coord->y][s->coord->x] = 2;
-	while(sn != NULL)
-	{
-		if(!map[sn->coord->y][sn->coord->x])
-		{
-			map[sn->coord->y][sn->coord->x] = 2;
-		}
-		sn = sn->next;
-	}
-	for(i = 0; i < foodTotal; i++)
-	{
-		map[food[i]->y][food[i]->x] = 3;
-	}
-}
+
 //判断前方是否可以行走
 int isCross(int y, int x, SNAKE_HEAD *s)
 {
-	SNAKE_NODE *sn = s->next;
-	//判断坐标处是否有蛇存在
-	while(sn != NULL)
-	{
-		if(sn->coord->x == x && sn->coord->y == y)
-		{
-			return 0;
-		}
-		sn = sn->next;
-	}
     if(x < 1 || y < 1 || x >= MAP_SIZE || y >= MAP_SIZE || (map[y][x] != 0 && map[y][x] != 3))
     {
         return 0;
@@ -285,20 +323,24 @@ int isCross(int y, int x, SNAKE_HEAD *s)
 //放置食物
 void setFood()
 {
-	int x, y;
-	if(foodTotal < FOOD_SIZE)
+	int x, y, i;
+    for(i = 0; i < FOOD_SIZE; i++)
 	{
-		do
-		{
-			x = rand() % (MAP_SIZE - 1);
-			y = rand() % (MAP_SIZE - 1);
-			printf("%d|%d\n", x, y);
-		}while(map[y][x] != 0);
-		//放置食物
-		food[foodTotal] = calloc(1, sizeof(COORD_DATA));
-		food[foodTotal]->x = x;
-		food[foodTotal]->y = y;
-		foodTotal++;
+        if(food[i] != NULL)
+        {
+		    map[food[i]->y][food[i]->x] = 3;
+        }else
+        {
+            do
+            {
+                x = rand() % (MAP_SIZE - 1);
+                y = rand() % (MAP_SIZE - 1);
+            }while(map[y][x] != 0);
+            //放置食物
+            food[i] = calloc(1, sizeof(COORD_DATA));
+            food[i]->x = x;
+            food[i]->y = y;
+        }
 	}
 }
 
