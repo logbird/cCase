@@ -28,12 +28,12 @@ int snakeTotal = 0;
 
 int main(int argc, char** argv)
 {
-	int delay = 0, sindex = 0;
+	int delay = 0, sindex = 0, i = 0;
     //异常退出信号
 	signal(SIGINT, sigint_callback);
 	srand((unsigned int)time(NULL));
 
-    enum DIRECTION dir;
+    DIRECTION dir;
     SNAKE_HEAD *snake[3];
     snake[0] = createSnake(1, 1);
     snake[1] = createSnake(1, 28);
@@ -53,7 +53,11 @@ int main(int argc, char** argv)
             if(getSnakeTotal() <= 1)
             {
                 printf("%d胜利\n", snake[sindex]->id);
-                free(snake[sindex]);
+				snakeDie(snake[sindex]);
+				for(i = 0; i< FOOD_SIZE; i++)
+				{
+					if(food[i]!=NULL)free(food[i]);
+				}
                 exit(EXIT_SUCCESS);
             }
             dir = findRoad(snake[sindex]);
@@ -154,7 +158,7 @@ void snakeGrowUp(SNAKE_HEAD *s, size_t length)
     s->length += length;
 }
 //蛇行走
-int walkSnake(SNAKE_HEAD *s, enum DIRECTION dir)
+int walkSnake(SNAKE_HEAD *s, DIRECTION dir)
 {
     SNAKE_NODE *sn = s->next;
     COORD_DATA *coord = calloc(1, sizeof(COORD_DATA));
@@ -237,7 +241,7 @@ void snakeDie(SNAKE_HEAD *s)
     snakeTotal -= 1;
 }
 //选择方向
-enum DIRECTION findRoad(SNAKE_HEAD *s)
+DIRECTION findRoad(SNAKE_HEAD *s)
 {
     COORD_DATA *coord = s->coord;
     int i, index = 0;
@@ -251,73 +255,52 @@ enum DIRECTION findRoad(SNAKE_HEAD *s)
             index = i;
         }
     }
+	//向最近的食物前进
     if(food[index] != NULL)
     {
         //up
-        if((food[index]->y < coord->y) && isCross(coord->y-1, coord->x, s))
+        if((food[index]->y < coord->y) && isCross(coord->y-1, coord->x))
             return up;
         //down
-        if((food[index]->y > coord->y) && isCross(coord->y+1, coord->x, s))
+        if((food[index]->y > coord->y) && isCross(coord->y+1, coord->x))
             return down;
         //left
-        if((food[index]->x < coord->x) && isCross(coord->y, coord->x-1, s))
+        if((food[index]->x < coord->x) && isCross(coord->y, coord->x-1))
             return left;
         //right
-        if((food[index]->x > coord->x) && isCross(coord->y, coord->x+1, s))
+        if((food[index]->x > coord->x) && isCross(coord->y, coord->x+1))
             return right;
     }
-
-    switch(s->dir)
-    {
-        case up:
-            if(isCross(coord->y-1, coord->x, s))
-            {
-                return up;
-            }
-        case down:
-            if(isCross(coord->y+1, coord->x, s))
-            {
-                return down;
-            }
-        case left:
-            if(isCross(coord->y, coord->x-1, s))
-            {
-                return left;
-            }
-        case right:
-            if(isCross(coord->y, coord->x+1, s))
-            {
-                return right;
-            }
-        break;
-    }
-	if(isCross(coord->y-1, coord->x, s))
-	{
-		return up;
-	}
-	if(isCross(coord->y+1, coord->x, s))
-	{
-		return down;
-	}
-	if(isCross(coord->y, coord->x-1, s))
-	{
-		return left;
-	}
-	if(isCross(coord->y, coord->x+1, s))
-	{
-		return right;
-	}
-    return none;
+	//没有食物 自动行走
+	return enumRoad(coord, s->dir);
 }
 //枚举行进路径 改成枚举
-enum DIRECTION enumRoad(COORD_DATA *coord, int flg)
+DIRECTION enumRoad(COORD_DATA *coord, DIRECTION flg)
 {
     int index = 0;
-    if((flg == 0 || flg == 1) && isCross(coord->y, coord->x))
+    if((flg == none || flg == up) && isCross(coord->y-1, coord->x))
     {
-        ;
+    	return up;
     }
-    return 1;
+	if((flg == none || flg == down) && isCross(coord->y+1, coord->x))
+    {
+    	return down;
+    }
+	if((flg == none || flg == left) && isCross(coord->y, coord->x-1))
+    {
+    	return left;
+    }
+	if((flg == none || flg == right) && isCross(coord->y, coord->x+1))
+    {
+    	return right;
+    }
+    if(flg == none)
+	{
+		return none;
+	}else
+	{
+		return enumRoad(coord, none);
+	}
 }
 //判断前方是否可以行走
 int isCross(int y, int x)

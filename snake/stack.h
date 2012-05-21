@@ -10,9 +10,9 @@ typedef struct coord{
 }COORD_DATA;
 
 //设置方向
-enum DIRECTION{
+typedef enum DIRECTION{
     up,down,left,right,none
-};
+} DIRECTION;
 
 //蛇
 typedef struct snakeNode{
@@ -23,7 +23,7 @@ typedef struct snakeNode{
 typedef struct snakeHead{
 	size_t id;
     size_t length;
-    enum DIRECTION dir;
+    DIRECTION dir;
 	COORD_DATA *coord;
 	SNAKE_NODE *next;
     SNAKE_NODE *end;
@@ -41,16 +41,16 @@ SNAKE_HEAD *createSnake(int x, int y);
 //蛇长大
 void snakeGrowUp(SNAKE_HEAD *s, size_t length); 
 //蛇行走
-int walkSnake(SNAKE_HEAD *s, enum DIRECTION dir);
+int walkSnake(SNAKE_HEAD *s, DIRECTION dir);
 //获取蛇数目
 size_t getSnakeTotal();
 //蛇死亡
 void snakeDie(SNAKE_HEAD *s);
 
 //选择方向
-enum DIRECTION findRoad(SNAKE_HEAD *s);
+DIRECTION findRoad(SNAKE_HEAD *s);
 //枚举行进路径
-enum DIRECTION enumRoad(COORD_DATA *coord, int flg);
+DIRECTION enumRoad(COORD_DATA *coord, DIRECTION flg);
 //判断前方是否可以行走
 int isCross(int x, int y);
 //放置食物
