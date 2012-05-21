@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <assert.h>
 #include <memory.h>
+#include <time.h>
 
 
 
@@ -119,10 +120,12 @@ SNAKE_HEAD * createSnake(int x, int y)
 {
     SNAKE_HEAD *s;
     COORD_DATA *coord = calloc(1, sizeof(SNAKE_HEAD));
+	assert(coord != NULL);
     //默认出生地 为 (1,1)
     coord->x = x;
     coord->y = y;
     s = calloc(1, sizeof(SNAKE_HEAD));
+	assert(s != NULL);
     s->id = getSnakeTotal()+1;
     s->dir = right;
     s->length = 0;
@@ -142,7 +145,9 @@ void snakeGrowUp(SNAKE_HEAD *s, size_t length)
         //蛇尾
         sn = s->end;
         body = calloc(1, sizeof(SNAKE_NODE)); 
+		assert(body != NULL);
         coord = calloc(1, sizeof(COORD_DATA));
+		assert(coord != NULL);
         body->coord = coord;
         body->next = NULL;
         if(sn != NULL)
@@ -162,7 +167,9 @@ int walkSnake(SNAKE_HEAD *s, DIRECTION dir)
 {
     SNAKE_NODE *sn = s->next;
     COORD_DATA *coord = calloc(1, sizeof(COORD_DATA));
+	assert(coord != NULL);
     COORD_DATA *tmp = calloc(1, sizeof(COORD_DATA));
+	assert(tmp != NULL);
     coord->x = s->coord->x;
     coord->y = s->coord->y;
     int i = 0;
@@ -277,7 +284,6 @@ DIRECTION findRoad(SNAKE_HEAD *s)
 //枚举行进路径 改成枚举
 DIRECTION enumRoad(COORD_DATA *coord, DIRECTION flg)
 {
-    int index = 0;
     if((flg == none || flg == up) && isCross(coord->y-1, coord->x))
     {
     	return up;
@@ -330,6 +336,7 @@ void setFood()
             }while(map[y][x] != 0);
             //放置食物
             food[i] = calloc(1, sizeof(COORD_DATA));
+			assert(food[i] != NULL);
             food[i]->x = x;
             food[i]->y = y;
         }
